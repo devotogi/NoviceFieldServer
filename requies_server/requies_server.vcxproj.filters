@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="requiesServer.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="GameSession.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SessionManager.cpp" />
+    <ClCompile Include="PacketHandler.cpp" />
+    <ClCompile Include="Sector.cpp" />
+    <ClCompile Include="MonsterManager.cpp" />
+    <ClCompile Include="MapManager.cpp" />
+    <ClCompile Include="SpawnZone.cpp" />
+    <ClCompile Include="FPS.cpp" />
+    <ClCompile Include="Creature.cpp" />
+    <ClCompile Include="Monster.cpp" />
+    <ClCompile Include="RandomManager.cpp" />
+    <ClCompile Include="MonsterTable.cpp" />
+    <ClCompile Include="DBConnectionPool.cpp" />
+    <ClCompile Include="MyDBConnection.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="GameSession.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="SessionManager.h" />
+    <ClInclude Include="PacketHandler.h" />
+    <ClInclude Include="Sector.h" />
+    <ClInclude Include="MonsterManager.h" />
+    <ClInclude Include="MapManager.h" />
+    <ClInclude Include="SpawnZone.h" />
+    <ClInclude Include="FPS.h" />
+    <ClInclude Include="Creature.h" />
+    <ClInclude Include="Monster.h" />
+    <ClInclude Include="RandomManager.h" />
+    <ClInclude Include="MonsterTable.h" />
+    <ClInclude Include="DBConnectionPool.h" />
+    <ClInclude Include="MyDBConnection.h" />
+  </ItemGroup>
+</Project>
