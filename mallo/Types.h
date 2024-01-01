@@ -249,11 +249,10 @@ public:
 struct MonsterAttribute 
 {
 public:
-	float hp = 0;
-	float defensive = 0;
+	int hp = 0;
+	int defensive = 0;
 	float speed = 0;
-	float damage = 0;
-	float exp = 0;
+	int damage = 0;
+	int exp = 0;
 	bool  firstAttack = false;
-	float hpMax = 0;
 };

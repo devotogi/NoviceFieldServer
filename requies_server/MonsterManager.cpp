@@ -89,18 +89,25 @@ void MonsterManager::AttackedMonster(int32 monsterId, Creature* attacker, int32 
 
 	if (distF >= 20) return;
 
+	int32 monsterDefense = _monsterTable[monsterId].GetDefense();
 	_monsterTable[monsterId].Attacked(attacker, playerDamage);
+
+	int32 realDamge = playerDamage - monsterDefense;
+
+	if (realDamge < 0)
+		realDamge = 0;
 
 	BYTE sendBuffer[100];
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 
-	 int32 mtType = _monsterTable[monsterId].GetMonsterType();
+	 int8 mtType = _monsterTable[monsterId].GetMonsterType();
 	float mtHp = _monsterTable[monsterId].GetHp();
 
 	bw.Write(monsterId);
 	bw.Write(mtType);
 	bw.Write(mtHp);
+	bw.Write(realDamge);
 
 	pktHeader->_type = PacketProtocol::S2C_MONSTERINFO;
 	pktHeader->_pktSize = bw.GetWriterSize();

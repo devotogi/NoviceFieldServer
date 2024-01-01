@@ -52,6 +52,7 @@ public:
 	void Clear();
 	void SetAttribute(const MonsterAttribute& attr);
 	void SetMonsterType(MonsterType type) { _monsterType = type; }
+	int32 GetDefense() { return _defensive; }
 
 private:
 	void UpdateIdle(int32 deltaTcik);

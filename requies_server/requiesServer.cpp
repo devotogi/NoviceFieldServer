@@ -39,7 +39,6 @@ int main()
 	AccountDBConnectionPool::GetInstance()->Init(L"MSSQL", L"sa", L"root", 5);
 	MonsterTable::GetInstnace()->Init();
 	MonsterManager::GetInstnace()->Init(1000);
-
 	MapManager::GetInstance()->MapLoad("C:\\Users\\jgkang\\Desktop\\map\\map.dat");
 
 	const char* ip = "58.236.130.58";

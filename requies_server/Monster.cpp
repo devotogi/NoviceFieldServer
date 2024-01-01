@@ -48,7 +48,7 @@ void Monster::Clear()
 void Monster::SetAttribute(const MonsterAttribute& attr)
 {
 	_hp = attr.hp;
-	_hpMax = attr.hpMax;
+	_hpMax = attr.hp;
 	_defensive = attr.defensive;
 	_speed = attr.speed;
 	_damage = attr.damage;
@@ -59,6 +59,9 @@ void Monster::SetAttribute(const MonsterAttribute& attr)
 bool Monster::Attacked(Creature* Attacker, int32 damage)
 {
 	float realDamge = damage - _defensive;
+
+	if (realDamge < 0)
+		realDamge = 0;
 
 	MonsterAttackedInfo info{ Attacker, realDamge };
 	_monsterAttackedEventQueue.Push(info);
@@ -353,16 +356,16 @@ void Monster::SyncMonsterPacket()
 		bw.Write(pos);
 	}
 
-	int32 cnt = _damageQueue.size();
-	bw.Write(cnt);
+	//int32 cnt = _damageQueue.size();
+	//bw.Write(cnt);
 
-	while (_damageQueue.empty() == false)
-	{
-		int32 damge = _damageQueue.front();
-		_damageQueue.pop();
+	//while (_damageQueue.empty() == false)
+	//{
+	//	int32 damge = _damageQueue.front();
+	//	_damageQueue.pop();
 
-		bw.Write(damge);
-	}
+	//	bw.Write(damge);
+	//}
 
 	pktHeader->_type = PacketProtocol::S2C_MONSTERSYNC;
 	pktHeader->_pktSize = bw.GetWriterSize();
