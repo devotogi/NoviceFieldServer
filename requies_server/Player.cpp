@@ -3,7 +3,7 @@
 #include "GameSession.h"
 #include "BufferWriter.h"
 #include "MapManager.h"
-Player::Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR* playerName, int32 level, int32 hp, int32 mp, int32 damage, float speed, float defense, int32 playerType, int32 playerSQ) : _sessionId(sessionId), _mouseDir(Dir::NONE), _level(level), _cameraLocalRotation({ 0,0,0,1 }), _session(session), Creature(CreatureType::PLAYER, pos, pos, State::IDLE, Dir::NONE, hp, mp, damage, speed, false, defense, hp, mp), _playerType(playerType), _playerSQ(playerSQ)
+Player::Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR* playerName, int32 level, int32 hp, int32 mp, int32 damage, float speed, float defense, int32 playerType, int32 playerSQ, int32 exp) : _sessionId(sessionId), _mouseDir(Dir::NONE), _level(level), _cameraLocalRotation({ 0,0,0,1 }), _session(session), Creature(CreatureType::PLAYER, pos, pos, State::IDLE, Dir::NONE, hp, mp, damage, speed, false, defense, hp, mp), _playerType(playerType), _playerSQ(playerSQ), _exp(exp)
 {
 	SetPlayerName(playerName);
 	InitializeCriticalSection(&_cs);
@@ -131,7 +131,6 @@ void Player::ExpUp(float exp)
 	bw.Write(_level);
 	bw.Write(_exp);
 	bw.Write(_expMax);
-	bw.Write(_hpMax);
 	bw.Write(_hp);
 	pktHeader->_type = PacketProtocol::S2C_PLAYEREXP;
 	pktHeader->_pktSize = bw.GetWriterSize();
@@ -141,7 +140,6 @@ void Player::ExpUp(float exp)
 void Player::LevelUp()
 {
 	_level++;
-	_expMax = _level * 1000;
 	_hpMax = _hpMax + (_level * (_hpMax * 0.2));
 	_hp = _hpMax;
 	StatPointUp();

@@ -22,7 +22,7 @@ private:
 	WCHAR				_playerName[256] = {};
 
 public:
-	Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR* playerName, int32 level, int32 hp, int32 mp, int32 damage, float speed, float defense, int32 playerType, int32 playerSQ);
+	Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR* playerName, int32 level, int32 hp, int32 mp, int32 damage, float speed, float defense, int32 playerType, int32 playerSQ, int32 exp);
 	~Player();
 
 	Dir			 GetMouseDir() { return _mouseDir; }
@@ -40,6 +40,7 @@ public:
 
 	float        GetSpeed();
 	float        GetDamage();
+	int32		 GetExp() { return _exp; }
 public:
 	void         StatPointUp();
 	void         StatPointDown();

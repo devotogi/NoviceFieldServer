@@ -27,16 +27,20 @@ void GameSession::OnDisconnect()
 	int32 playerSQ = _player->GetPlayerSQ();
 	Vector3 playerPos = _player->GetPos();
 	int32 nowPort = 30002;
+	int32 level = _player->GetLevel();
+	int32 exp = _player->GetExp();
 
 	// 로그아웃 시간 DB에 저장
 	{
 		SQLLEN len;
-		SQLPrepare(playerCon->GetHSTMT(), (SQLWCHAR*)L"update player.d_player set x = ?,y = ?,z = ?,LAST_PORT = ? where PLAYER_SQ = ?", SQL_NTS);
+		SQLPrepare(playerCon->GetHSTMT(), (SQLWCHAR*)L"update player.d_player set x = ?,y = ?,z = ?,LAST_PORT = ?,EXP=?,LEVEL=? where PLAYER_SQ = ?", SQL_NTS);
 		SQLBindParameter(playerCon->GetHSTMT(), 1, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.x, 0, NULL);
 		SQLBindParameter(playerCon->GetHSTMT(), 2, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.y, 0, NULL);
 		SQLBindParameter(playerCon->GetHSTMT(), 3, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.z, 0, NULL);
 		SQLBindParameter(playerCon->GetHSTMT(), 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&nowPort, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 5, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&playerSQ, 0, NULL);
+		SQLBindParameter(playerCon->GetHSTMT(), 5, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&exp, 0, NULL);
+		SQLBindParameter(playerCon->GetHSTMT(), 6, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&level, 0, NULL);
+		SQLBindParameter(playerCon->GetHSTMT(), 7, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&playerSQ, 0, NULL);
 		SQLExecute(playerCon->GetHSTMT());
 		SQLFetch(playerCon->GetHSTMT());
 		SQLCloseCursor(playerCon->GetHSTMT());
@@ -67,9 +71,10 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 		float speed;
 		int32 defense;
 		int32 playerType;
+		int32 exp;
 
 		{
-			SQLPrepare(con->GetHSTMT(), (SQLWCHAR*)L"select top 1 player_name,level,hp,mp,x,y,z,damage,speed,defense,player_type from player.d_player where PLAYER_SQ = ?;", SQL_NTS);
+			SQLPrepare(con->GetHSTMT(), (SQLWCHAR*)L"select top 1 player_name,level,hp,mp,x,y,z,damage,speed,defense,player_type,exp from player.d_player where PLAYER_SQ = ?;", SQL_NTS);
 			SQLBindParameter(con->GetHSTMT(), 1, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&playerSQ, 0, NULL);
 			SQLLEN len = 0;
 
@@ -84,6 +89,7 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 			SQLBindCol(con->GetHSTMT(), 9, SQL_C_FLOAT, &speed, sizeof(speed), &len);
 			SQLBindCol(con->GetHSTMT(), 10, SQL_INTEGER, &defense, sizeof(defense), &len);
 			SQLBindCol(con->GetHSTMT(), 11, SQL_INTEGER, &playerType, sizeof(playerType), &len);
+			SQLBindCol(con->GetHSTMT(), 12, SQL_INTEGER, &exp, sizeof(exp), &len);
 			SQLExecute(con->GetHSTMT());
 			SQLFetch(con->GetHSTMT());
 			SQLCloseCursor(con->GetHSTMT());
@@ -95,7 +101,7 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 			pos = { 12,0,123 };
 		}
 
-		_player = new Player(this, userSQ, pos, playerName, level, hp, mp, damage,speed,defense, playerType, playerSQ);
+		_player = new Player(this, userSQ, pos, playerName, level, hp, mp, damage,speed,defense, playerType, playerSQ,exp);
 		SessionManager::GetInstance()->AddSession(userSQ, this);
 	}
 	BYTE sendBuffer[300];
@@ -116,7 +122,7 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 	WCHAR* userName = _player->GetPlayerName();
 	int8 userNameSize = (int8)(wcslen(userName) * sizeof(WCHAR));
 	int8 playerType = (int8)_player->GetPlayerType();
-
+	int32 exp = _player->GetExp();
 	bw.Write(sessionId);
 	bw.Write(playerState);
 	bw.Write(playerDir);
@@ -131,6 +137,7 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 	bw.Write(userNameSize);
 	bw.WriteWString(userName, userNameSize);
 	bw.Write(playerType);
+	bw.Write(exp);
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERINIT;
 	pktHeader->_pktSize = bw.GetWriterSize();
