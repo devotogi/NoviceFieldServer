@@ -50,12 +50,17 @@ void MapManager::MapLoad(const char* filePath)
 		_sectors[i] = new Sector();
 
 	// BoundBox boundTestBox { 80, 80,64,64};
-	BoundBox boundBox1 { 256, 256,0,0};
+	BoundBox boundBox1 { 175, 144,147,107};
+	BoundBox boundBox2 { 91, 217,48,174};
 	
 	// _spawnZones.push_back(new SpawnZone(0, 1, boundTestBox, MonsterType::Bear));
-	_spawnZones.push_back(new SpawnZone(0, 40, boundBox1, MonsterType::Bear));
-	_spawnZones.push_back(new SpawnZone(1, 40, boundBox1, MonsterType::Skeleton));
-	_spawnZones.push_back(new SpawnZone(2, 40, boundBox1, MonsterType::Thief));
+	_spawnZones.push_back(new SpawnZone(0, 5, boundBox1, MonsterType::Bear));
+	_spawnZones.push_back(new SpawnZone(1, 5, boundBox1, MonsterType::Skeleton));
+	_spawnZones.push_back(new SpawnZone(2, 5, boundBox1, MonsterType::Thief));
+
+	_spawnZones.push_back(new SpawnZone(3, 5, boundBox2, MonsterType::Bear));
+	_spawnZones.push_back(new SpawnZone(4, 5, boundBox2, MonsterType::Skeleton));
+	_spawnZones.push_back(new SpawnZone(5, 5, boundBox2, MonsterType::Thief));
 
 	//_spawnZones.push_back(new SpawnZone(3, 10, boundBox2, MonsterType::Bear));
 	//_spawnZones.push_back(new SpawnZone(4, 10, boundBox2, MonsterType::Skeleton));

@@ -5,11 +5,6 @@ class Monster;
 
 class MonsterManager : public FPS
 {
-	enum : int32 
-	{
-		MONSTER_UPDATE_TICK = 50
-	};
-
 private:
 	int32						_monsterId = 0;
 	CRITICAL_SECTION			_cs;

@@ -71,7 +71,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	Quaternion quaternion;
 	Vector3 target;
 	MoveType moveType;
-
+	Vector3 angle;
 	br.Read(playerId);
 	br.Read(state);
 	br.Read(dir);
@@ -80,8 +80,9 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	br.Read(quaternion);
 	br.Read(target);
 	br.Read(moveType);
+	br.Read(angle);
 
-	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, moveType);
+	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, moveType, angle);
 
 	BYTE sendBuffer[100];
 	BufferWriter bw(sendBuffer);
@@ -95,6 +96,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* pack
 	bw.Write(player->GetCameraLocalRotation());
 	bw.Write(target);
 	bw.Write((int8)moveType);
+	bw.Write(angle);
 
 	pktHeader->_type = PacketProtocol::S2C_PLAYERSYNC;
 	pktHeader->_pktSize = bw.GetWriterSize();
@@ -134,6 +136,7 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	Quaternion quaternion;
 	Vector3 target;
 	MoveType moveType;
+	Vector3 angle;
 
 	br.Read(playerId);
 	br.Read(state);
@@ -143,8 +146,9 @@ void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet,
 	br.Read(quaternion);
 	br.Read(target);
 	br.Read(moveType);
+	br.Read(angle);
 
-	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, moveType);
+	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, moveType,angle);
 	MapManager::GetInstance()->MapSync(session->GetPlayer());
 	player->SetPrevPos(vector3);
 }
@@ -155,7 +159,7 @@ void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* pa
 	int32 damage;
 
 	BufferReader br(packet);
-	br.Read(otherPlayer);
+	br.Read(otherPlayer); 
 	br.Read(damage);
 
 	Player* AttackPlayer = session->GetPlayer();

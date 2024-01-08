@@ -9,7 +9,7 @@ private:
 public:
 	static Session* MakeGameSession(const SOCKET& socket, const SOCKADDR_IN& sockAddr) { return new GameSession(socket, sockAddr); }
 
-public:
+public:	
 	Player* GetPlayer() { return _player; }
 
 public:

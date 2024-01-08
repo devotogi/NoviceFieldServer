@@ -65,7 +65,7 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 		WCHAR playerName[256] = {};
 		int32 level;
 		int32 hp;
-		int32 mp;
+		int32 mp;	
 		Vector3 pos;
 		int32 damage;
 		float speed;

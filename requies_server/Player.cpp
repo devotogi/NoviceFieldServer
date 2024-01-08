@@ -17,7 +17,7 @@ Player::~Player()
 	DeleteCriticalSection(&_cs);
 }
 
-void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType)
+void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType, const Vector3 angle)
 {
 	EnterCriticalSection(&_cs);
 	_pos = pos;
@@ -27,6 +27,7 @@ void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, 
 	_mouseDir = mousedir;
 	_target = target;
 	_moveType = moveType;
+	_angle = angle;
 	LeaveCriticalSection(&_cs);
 }
 

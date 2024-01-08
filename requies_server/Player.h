@@ -20,6 +20,7 @@ private:
 	int32				_statPoint = 0;
 	int8				_playerType;
 	WCHAR				_playerName[256] = {};
+	Vector3				_angle;
 
 public:
 	Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR* playerName, int32 level, int32 hp, int32 mp, int32 damage, float speed, float defense, int32 playerType, int32 playerSQ, int32 exp);
@@ -30,7 +31,7 @@ public:
 	MoveType	 GetMoveType() { return _moveType; }
 	Vector3&	 GetTarget() { return _target; }
 	Quaternion&	 GetLocalRtation() { return _localRotation; }
-	void		 PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType);
+	void		 PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType, const Vector3 angle);
 	virtual bool Attacked(Creature* Attacker, int32 damage);
 	void         ReSpawn();
 	GameSession* GetSession() { return _session; }

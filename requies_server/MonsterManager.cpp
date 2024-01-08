@@ -56,7 +56,7 @@ Monster* MonsterManager::PopMonster(MonsterType type)
 
 void MonsterManager::Update(int32 currentTick)
 {
-	_lastTick =_lastTick == 0 ? currentTick : _lastTick;
+	_lastTick = _lastTick == 0 ? currentTick : _lastTick;
 	int32 deltaTick = currentTick - _lastTick;
 
 	_sumTick += deltaTick;
@@ -75,6 +75,7 @@ void MonsterManager::AttackedMonster(int32 monsterId, Creature* attacker, int32 
 {
 	Vector3 attackerPos = attacker->GetPos();
 	float playerDamage = static_cast<Player*>(attacker)->GetDamage();
+	int32 playerType = static_cast<Player*>(attacker)->GetPlayerType();
 
 	if (_monsterTable[monsterId].IsDead()) return;
 
@@ -87,7 +88,9 @@ void MonsterManager::AttackedMonster(int32 monsterId, Creature* attacker, int32 
 	Vector3 dist = playerPos - s_monsterPos;
 	float distF = dist.Magnitude();
 
-	if (distF >= 20) return;
+	if (playerType == 2 && distF >= 15) return;
+
+	if (playerType == 1 && distF >= 5) return;
 
 	int32 monsterDefense = _monsterTable[monsterId].GetDefense();
 	_monsterTable[monsterId].Attacked(attacker, playerDamage);
