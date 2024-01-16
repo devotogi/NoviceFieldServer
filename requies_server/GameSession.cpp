@@ -23,32 +23,31 @@ void GameSession::OnRecv(Session* session, BYTE* dataPtr, int32 dataLen)
 
 void GameSession::OnDisconnect()
 {
-	DBConnection* playerCon = PlayerDBConnectionPool::GetInstance()->Pop();
-	int32 playerSQ = _player->GetPlayerSQ();
-	Vector3 playerPos = _player->GetPos();
-	int32 nowPort = 30002;
-	int32 level = _player->GetLevel();
-	int32 exp = _player->GetExp();
+	//DBConnection* playerCon = PlayerDBConnectionPool::GetInstance()->Pop();
+	//int32 playerSQ = _player->GetPlayerSQ();
+	//Vector3 playerPos = _player->GetPos();
+	//int32 nowPort = 30002;
+	//int32 level = _player->GetLevel();
+	//int32 exp = _player->GetExp();
 
-	// 로그아웃 시간 DB에 저장
-	{
-		SQLLEN len;
-		SQLPrepare(playerCon->GetHSTMT(), (SQLWCHAR*)L"update player.d_player set x = ?,y = ?,z = ?,LAST_PORT = ?,EXP=?,LEVEL=? where PLAYER_SQ = ?", SQL_NTS);
-		SQLBindParameter(playerCon->GetHSTMT(), 1, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.x, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 2, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.y, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 3, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.z, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&nowPort, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 5, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&exp, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 6, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&level, 0, NULL);
-		SQLBindParameter(playerCon->GetHSTMT(), 7, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&playerSQ, 0, NULL);
-		SQLExecute(playerCon->GetHSTMT());
-		SQLFetch(playerCon->GetHSTMT());
-		SQLCloseCursor(playerCon->GetHSTMT());
-	}
+	//// 로그아웃 시간 DB에 저장
+	//{
+	//	SQLLEN len;
+	//	SQLPrepare(playerCon->GetHSTMT(), (SQLWCHAR*)L"update player.d_player set x = ?,y = ?,z = ?,LAST_PORT = ?,EXP=?,LEVEL=? where PLAYER_SQ = ?", SQL_NTS);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 1, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.x, 0, NULL);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 2, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.y, 0, NULL);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 3, SQL_PARAM_INPUT, SQL_C_FLOAT, SQL_FLOAT, 0, 0, (SQLFLOAT*)&playerPos.z, 0, NULL);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 4, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&nowPort, 0, NULL);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 5, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&exp, 0, NULL);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 6, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&level, 0, NULL);
+	//	SQLBindParameter(playerCon->GetHSTMT(), 7, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, (SQLINTEGER*)&playerSQ, 0, NULL);
+	//	SQLExecute(playerCon->GetHSTMT());
+	//	SQLFetch(playerCon->GetHSTMT());
+	//	SQLCloseCursor(playerCon->GetHSTMT());
+	//}
 
 	SessionManager::GetInstance()->PopSession(_sessionId);
-
-	PlayerDBConnectionPool::GetInstance()->Push(playerCon);
+	//PlayerDBConnectionPool::GetInstance()->Push(playerCon);
 }
 
 void GameSession::OnConnect()

@@ -11,15 +11,13 @@ Player::Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR*
 
 Player::~Player()
 {
-	EnterCriticalSection(&_cs);
 	MapManager::GetInstance()->ReSet(this);
-	LeaveCriticalSection(&_cs);
 	DeleteCriticalSection(&_cs);
 }
 
 void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType, const Vector3 angle)
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 	_pos = pos;
 	_state = state;
 	_dir = dir;
@@ -28,7 +26,6 @@ void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, 
 	_target = target;
 	_moveType = moveType;
 	_angle = angle;
-	LeaveCriticalSection(&_cs);
 }
 
 bool Player::Attacked(Creature* Attacker, int32 damage)
@@ -76,13 +73,14 @@ void Player::ReSpawn()
 {
 	MapManager::GetInstance()->ReSet(this);
 
-	EnterCriticalSection(&_cs);
-	_pos = { 6,0,125 };
-	_prevPos = { 6,0,125 };
-	_state = IDLE;
-	_dir = NONE;
-	_mouseDir = NONE;
-	LeaveCriticalSection(&_cs);
+	{
+		Lock lock(&_cs);
+		_pos = { 6,0,125 };
+		_prevPos = { 6,0,125 };
+		_state = IDLE;
+		_dir = NONE;
+		_mouseDir = NONE;
+	}
 
 	BYTE sendBuffer[100];
 	BufferWriter bw(sendBuffer);
@@ -117,14 +115,15 @@ void Player::ReSpawn()
 
 void Player::ExpUp(float exp)
 {
-	EnterCriticalSection(&_cs);
-	_exp += exp;
-	if (_exp >= _expMax) 
 	{
-		LevelUp();
-		SendStatInfo(); 
+		Lock lock(&_cs);
+		_exp += exp;
+		if (_exp >= _expMax)
+		{
+			LevelUp();
+			SendStatInfo();
+		}
 	}
-	LeaveCriticalSection(&_cs);
 	BYTE sendBuffer[100] = {};
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
@@ -163,18 +162,16 @@ float Player::GetDamage()
 
 void Player::StatPointUp()
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 	_statPoint += 4;
-	LeaveCriticalSection(&_cs);
 }
 	
 void Player::StatPointDown()
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 	_statPoint--;
 
 	if (_statPoint <= 0) _statPoint = 0;
-	LeaveCriticalSection(&_cs);
 }
 
 void Player::SendStatInfo()

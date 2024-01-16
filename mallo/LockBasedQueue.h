@@ -19,33 +19,27 @@ public:
 
 	bool Empty() 
 	{
-		EnterCriticalSection(&_cs);
+		Lock lock(&_cs);
 
 		bool ret = _queue.empty();
 
-		LeaveCriticalSection(&_cs);
-		
 		return ret;
 	}
 
 
 	void Push(const T& val) 
 	{
-		EnterCriticalSection(&_cs);
+		Lock lock(&_cs);
 
 		_queue.push(val);
-
-		LeaveCriticalSection(&_cs);
 	}
 
 	T Pop()
 	{
-		EnterCriticalSection(&_cs);
+		Lock lock(&_cs);
 
 		T ret = _queue.front();
 		_queue.pop();
-
-		LeaveCriticalSection(&_cs);
 		
 		return ret;
 	}

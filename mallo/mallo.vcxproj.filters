@@ -41,6 +41,7 @@
       <Filter>Base</Filter>
     </ClInclude>
     <ClInclude Include="LockBasedQueue.h" />
+    <ClInclude Include="Lock.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">
@@ -85,5 +86,6 @@
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="LockBasedQueue.cpp" />
+    <ClCompile Include="Lock.cpp" />
   </ItemGroup>
 </Project>

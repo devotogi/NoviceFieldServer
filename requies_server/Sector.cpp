@@ -17,48 +17,38 @@ Sector::~Sector()
 
 void Sector::Set(Monster* monster)
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 
 	_monsters.insert(monster);
-
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::Set(GameSession* session)
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 
 	_sessions.insert(session);
-
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::Reset(GameSession* session)
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 
 	_sessions.erase(session);
-
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::Reset(Monster* monster)
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 
 	_monsters.erase(monster);
-
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize)
 {
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 
 	for (auto s : _sessions)
 		s->Send(sendBuffer, sendSize);
-
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::SendPlayerList(GameSession* session)
@@ -102,7 +92,7 @@ void Sector::SendPlayerList(GameSession* session)
 	pktHeader->_type = PacketProtocol::S2C_PLAYERNEW;
 	pktHeader->_pktSize = bw.GetWriterSize();
 
-	EnterCriticalSection(&_cs);
+	Lock lock(&_cs);
 
 	for (auto s : _sessions)
 	{
@@ -163,48 +153,45 @@ void Sector::SendPlayerList(GameSession* session)
 			sendBuffer2 = nullptr;
 		}
 	}
-
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::SendMonsterList(GameSession* session)
 {
 	BYTE sendBuffer[4096] = {};
 	BufferWriter bw(sendBuffer);
-
-	EnterCriticalSection(&_cs);
-
 	PacketHeader* header = bw.WriteReserve<PacketHeader>();
-	const int32 cnt = _monsters.size();
-
-	bw.Write(cnt);
-
-	for (auto monster : _monsters)
 	{
-		State monsterState = monster->GetState();
+		Lock lock(&_cs);
 
-		if (monsterState == PATROL || monsterState == TRACE)
-			monsterState = MOVE;
+		const int32 cnt = _monsters.size();
 
-		bw.Write(monsterState);
-		bw.Write(monster->GetMonsterType());
-		bw.Write(monster->GetMonsterId());
-		bw.Write(monster->GetPos());
-		bw.Write(monster->GetHp());
-		bw.Write(monster->GetVDir());
-		bw.Write(monster->GetDest());
+		bw.Write(cnt);
 
-		int32 connerSize = monster->GetConner().size();
-		bw.Write(connerSize);
-
-		for (int32 i = 0; i < connerSize; i++)
+		for (auto monster : _monsters)
 		{
-			Pos pos = monster->GetConner()[i];
-			bw.Write(pos);
+			State monsterState = monster->GetState();
+
+			if (monsterState == PATROL || monsterState == TRACE)
+				monsterState = MOVE;
+
+			bw.Write(monsterState);
+			bw.Write(monster->GetMonsterType());
+			bw.Write(monster->GetMonsterId());
+			bw.Write(monster->GetPos());
+			bw.Write(monster->GetHp());
+			bw.Write(monster->GetVDir());
+			bw.Write(monster->GetDest());
+
+			int32 connerSize = monster->GetConner().size();
+			bw.Write(connerSize);
+
+			for (int32 i = 0; i < connerSize; i++)
+			{
+				Pos pos = monster->GetConner()[i];
+				bw.Write(pos);
+			}
 		}
 	}
-
-	LeaveCriticalSection(&_cs);
 
 	header->_pktSize = bw.GetWriterSize();
 	header->_type = S2C_MONSTERRENEWLIST;
@@ -237,8 +224,7 @@ void Sector::SendPlayerRemoveList(GameSession* session)
 	pktHeader->_type = PacketProtocol::S2C_PLAYEROUT;
 	pktHeader->_pktSize = bw.GetWriterSize();
 
-	EnterCriticalSection(&_cs);
-
+	Lock lock(&_cs);
 	int32 playerCount = _sessions.size();
 
 	if (playerCount > 0)
@@ -281,27 +267,25 @@ void Sector::SendPlayerRemoveList(GameSession* session)
 		s->Send(sendBuffer, pktHeader->_pktSize);
 	}
 
-	LeaveCriticalSection(&_cs);
 }
 
 void Sector::SendMonsterRemoveList(GameSession* session)
 {
 	BYTE sendBuffer[4096] = {};
 	BufferWriter bw(sendBuffer);
-
-	EnterCriticalSection(&_cs);
-
 	PacketHeader* header = bw.WriteReserve<PacketHeader>();
-	const int32 cnt = _monsters.size();
-
-	bw.Write(cnt);
-
-	for (auto monster : _monsters)
 	{
-		bw.Write(monster->GetMonsterId());
-	}
+		Lock lock(&_cs);
 
-	LeaveCriticalSection(&_cs);
+		const int32 cnt = _monsters.size();
+
+		bw.Write(cnt);
+
+		for (auto monster : _monsters)
+		{
+			bw.Write(monster->GetMonsterId());
+		}
+	}
 
 	header->_pktSize = bw.GetWriterSize();
 	header->_type = S2C_MONSTERREMOVELIST;
