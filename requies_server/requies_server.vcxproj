@@ -188,8 +188,8 @@
     <ClInclude Include="MonsterManager.h" />
     <ClInclude Include="MonsterTable.h" />
     <ClInclude Include="MyDBConnection.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="PacketHandler.h" />
-    <ClInclude Include="PacketHeader.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RandomManager.h" />

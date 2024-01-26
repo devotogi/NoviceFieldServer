@@ -13,7 +13,7 @@ private:
 	Quaternion			_localRotation;
 	Quaternion			_cameraLocalRotation;
 	GameSession*		_session;
-	CRITICAL_SECTION	_cs;
+	CriticalSectionObject	_cs;
 	float				_exp = 0;
 	float				_expMax = 1000.f;
 	int8				_level = 1;

@@ -6,18 +6,16 @@
 Player::Player(GameSession* session, int32 sessionId, const Vector3& pos, WCHAR* playerName, int32 level, int32 hp, int32 mp, int32 damage, float speed, float defense, int32 playerType, int32 playerSQ, int32 exp) : _sessionId(sessionId), _mouseDir(Dir::NONE), _level(level), _cameraLocalRotation({ 0,0,0,1 }), _session(session), Creature(CreatureType::PLAYER, pos, pos, State::IDLE, Dir::NONE, hp, mp, damage, speed, false, defense, hp, mp), _playerType(playerType), _playerSQ(playerSQ), _exp(exp)
 {
 	SetPlayerName(playerName);
-	InitializeCriticalSection(&_cs);
 }
 
 Player::~Player()
 {
 	MapManager::GetInstance()->ReSet(this);
-	DeleteCriticalSection(&_cs);
 }
 
 void Player::PlayerSync(const Vector3& pos, State state, Dir dir, Dir mousedir, const Quaternion& cameraLocalRotation, const Vector3& target, MoveType moveType, const Vector3 angle)
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 	_pos = pos;
 	_state = state;
 	_dir = dir;
@@ -74,7 +72,7 @@ void Player::ReSpawn()
 	MapManager::GetInstance()->ReSet(this);
 
 	{
-		Lock lock(&_cs);
+		LockGuard lock(&_cs);
 		_pos = { 6,0,125 };
 		_prevPos = { 6,0,125 };
 		_state = IDLE;
@@ -116,7 +114,7 @@ void Player::ReSpawn()
 void Player::ExpUp(float exp)
 {
 	{
-		Lock lock(&_cs);
+		LockGuard lock(&_cs);
 		_exp += exp;
 		if (_exp >= _expMax)
 		{
@@ -162,13 +160,13 @@ float Player::GetDamage()
 
 void Player::StatPointUp()
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 	_statPoint += 4;
 }
 	
 void Player::StatPointDown()
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 	_statPoint--;
 
 	if (_statPoint <= 0) _statPoint = 0;

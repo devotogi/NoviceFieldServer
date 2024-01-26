@@ -4,7 +4,7 @@ class GameSession;
 class Sector
 {
 private:
-	CRITICAL_SECTION		_cs;
+	CriticalSectionObject		_cs;
 	std::set<GameSession*> _sessions;
 	std::set<Monster*>	   _monsters;
 public:

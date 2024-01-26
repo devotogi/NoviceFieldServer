@@ -103,10 +103,9 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 		_player = new Player(this, userSQ, pos, playerName, level, hp, mp, damage,speed,defense, playerType, playerSQ,exp);
 		SessionManager::GetInstance()->AddSession(userSQ, this);
 	}
-	BYTE sendBuffer[300];
-	BufferWriter bw(sendBuffer);
-	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
-
+	//BYTE sendBuffer[300];
+	//BufferWriter bw(sendBuffer);
+	//PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
 	int32 sessionId = _sessionId;
 	int8 playerState = (int8)_player->GetState();
 	int8 playerDir =   (int8)_player->GetDir();
@@ -122,26 +121,42 @@ void GameSession::WelcomeInitPacket(int32 userSQ, int32 playerSQ)
 	int8 userNameSize = (int8)(wcslen(userName) * sizeof(WCHAR));
 	int8 playerType = (int8)_player->GetPlayerType();
 	int32 exp = _player->GetExp();
-	bw.Write(sessionId);
-	bw.Write(playerState);
-	bw.Write(playerDir);
-	bw.Write(playerMouseDir);
-	bw.Write(playerPos);
-	bw.Write(playerQuaternion);
-	bw.Write(hp);
-	bw.Write(mp);
-	bw.Write(level);
-	bw.Write(spped);
-	bw.Write(damage);
-	bw.Write(userNameSize);
-	bw.WriteWString(userName, userNameSize);
-	bw.Write(playerType);
-	bw.Write(exp);
+	//bw.Write(sessionId);
+	//bw.Write(playerState);
+	//bw.Write(playerDir);
+	//bw.Write(playerMouseDir);
+	//bw.Write(playerPos);
+	//bw.Write(playerQuaternion);
+	//bw.Write(hp);
+	//bw.Write(mp);
+	//bw.Write(level);
+	//bw.Write(spped);
+	//bw.Write(damage);
+	//bw.Write(userNameSize);
+	//bw.WriteWString(userName, userNameSize);
+	//bw.Write(playerType);
+	//bw.Write(exp);
 
-	pktHeader->_type = PacketProtocol::S2C_PLAYERINIT;
-	pktHeader->_pktSize = bw.GetWriterSize();
+	//pktHeader->_type = PacketProtocol::S2C_PLAYERINIT;
+	//pktHeader->_pktSize = bw.GetWriterSize();
 
-	Send(sendBuffer, pktHeader->_pktSize);
+
+	S2C_PLAYERINIT_PACKET sendPacket;
+	sendPacket.sessionId = sessionId;
+	sendPacket.playerState = playerState;
+	sendPacket.playerDir = playerDir;
+	sendPacket.playerMouseDir = playerMouseDir;
+	sendPacket.playerPos = playerPos;
+	sendPacket.playerQuaternion = playerQuaternion;
+	sendPacket.hp = hp;
+	sendPacket.mp = mp;
+	sendPacket.level = level;
+	sendPacket.speed = spped;
+	sendPacket.damage = damage;
+	wcscpy_s(sendPacket.playerName, userName);
+	sendPacket.playerType = playerType;
+	sendPacket.exp = exp;
+	Send(reinterpret_cast<BYTE*>(&sendPacket), sendPacket._size);
 	MapManager::GetInstance()->Set(_player);
 	PlayerDBConnectionPool::GetInstance()->Push(con);
 }

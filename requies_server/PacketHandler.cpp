@@ -17,11 +17,11 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 	switch (header->_type)
 	{
 	case PacketProtocol::C2S_PLAYERSYNC: // 플레이어 동기화
-		HandlePacket_C2S_PLAYERSYNC(session, dataPtr, dataSize);
+		HandlePacket_C2S_PLAYERSYNC(session, packet, dataSize);
 		break;
 
 	case PacketProtocol::C2S_MAPSYNC: // 플레이어가 1칸마다 좌표 동기화 
-		HandlePacket_C2S_MAPSYNC(session, dataPtr, dataSize);
+		HandlePacket_C2S_MAPSYNC(session, packet, dataSize);
 		break;
 
 	case PacketProtocol::C2S_LATENCY: // 모니터 레이턴시
@@ -53,7 +53,7 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 		break;
 
 	case PacketProtocol::C2S_PLAYERINIT:
-		HandlePacket_C2S_PLAYERINIT(session, dataPtr, dataSize);
+		HandlePacket_C2S_PLAYERINIT(session, packet, dataSize);
 		break;
 	}
 }
@@ -61,47 +61,10 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 void PacketHandler::HandlePacket_C2S_PLAYERSYNC(GameSession* session, BYTE* packet, int32 packetSize)
 {
 	Player* player = session->GetPlayer();
-	BufferReader br(packet);
-
-	int32 playerId;
-	State state;
-	Dir dir;
-	Dir mouseDir;
-	Vector3 vector3;
-	Quaternion quaternion;
-	Vector3 target;
-	MoveType moveType;
-	Vector3 angle;
-	br.Read(playerId);
-	br.Read(state);
-	br.Read(dir);
-	br.Read(mouseDir);
-	br.Read(vector3);
-	br.Read(quaternion);
-	br.Read(target);
-	br.Read(moveType);
-	br.Read(angle);
-
-	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, moveType, angle);
-
-	BYTE sendBuffer[100];
-	BufferWriter bw(sendBuffer);
-	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
-
-	bw.Write(session->GetSessionID());
-	bw.Write((int8)player->GetState());
-	bw.Write((int8)player->GetDir());
-	bw.Write((int8)player->GetMouseDir());
-	bw.Write(player->GetPos());
-	bw.Write(player->GetCameraLocalRotation());
-	bw.Write(target);
-	bw.Write((int8)moveType);
-	bw.Write(angle);
-
-	pktHeader->_type = PacketProtocol::S2C_PLAYERSYNC;
-	pktHeader->_pktSize = bw.GetWriterSize();
-
-	MapManager::GetInstance()->BroadCast(session->GetPlayer(), sendBuffer, bw.GetWriterSize());
+	PLAYERSYNC_PACKET* recvPacket = reinterpret_cast<PLAYERSYNC_PACKET*>(packet);
+	recvPacket->_code = S2C_PLAYERSYNC;
+	player->PlayerSync(recvPacket->vector3, recvPacket->state, recvPacket->playerDir, recvPacket->playerMouseDir, recvPacket->quaternion, recvPacket->target, recvPacket->moveType, recvPacket->angle);
+	MapManager::GetInstance()->BroadCast(session->GetPlayer(), reinterpret_cast<BYTE*>(recvPacket), recvPacket->_size);
 }
 
 void PacketHandler::HandlePacket_C2S_LATENCY(GameSession* session, BYTE* packet, int32 packetSize)
@@ -125,32 +88,10 @@ void PacketHandler::HandlePacket_C2S_LATENCY(GameSession* session, BYTE* packet,
 void PacketHandler::HandlePacket_C2S_MAPSYNC(GameSession* session, BYTE* packet, int32 packetSize)
 {
 	Player* player = session->GetPlayer();
-	Vector3 prevPos = player->GetPrevPos();
-	BufferReader br(packet);
-
-	int32 playerId;
-	State state;
-	Dir dir;
-	Dir mouseDir;
-	Vector3 vector3;
-	Quaternion quaternion;
-	Vector3 target;
-	MoveType moveType;
-	Vector3 angle;
-
-	br.Read(playerId);
-	br.Read(state);
-	br.Read(dir);
-	br.Read(mouseDir);
-	br.Read(vector3);
-	br.Read(quaternion);
-	br.Read(target);
-	br.Read(moveType);
-	br.Read(angle);
-
-	player->PlayerSync(vector3, state, dir, mouseDir, quaternion, target, moveType,angle);
+	PLAYERSYNC_PACKET* recvPacket = reinterpret_cast<PLAYERSYNC_PACKET*>(packet);
+	player->PlayerSync(recvPacket->vector3, recvPacket->state, recvPacket->playerDir, recvPacket->playerMouseDir, recvPacket->quaternion, recvPacket->target, recvPacket->moveType, recvPacket->angle);
 	MapManager::GetInstance()->MapSync(session->GetPlayer());
-	player->SetPrevPos(vector3);
+	player->SetPrevPos(recvPacket->vector3);
 }
 
 void PacketHandler::HandlePacket_C2S_PLAYERATTACK(GameSession* session, BYTE* packet, int32 packetSize)
@@ -259,10 +200,6 @@ void PacketHandler::HandlePacket_C2S_UPSTAT(GameSession* session, BYTE* packet, 
 
 void PacketHandler::HandlePacket_C2S_PLAYERINIT(GameSession* session, BYTE* packet, int32 dataSize)
 {
-	int32 userSQ;
-	int32 playerSQ;
-	BufferReader br(packet);
-	br.Read(userSQ);
-	br.Read(playerSQ);
-	session->WelcomeInitPacket(userSQ, playerSQ);
+	C2S_PLAYERINIT_PACKET* p = reinterpret_cast<C2S_PLAYERINIT_PACKET*>(packet);
+	session->WelcomeInitPacket(p->userSQ, p->playerSQ);
 }

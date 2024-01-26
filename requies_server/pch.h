@@ -6,7 +6,7 @@
 #endif
 
 #include "CorePch.h"
-
+#include "Packet.h"
 struct UserInfo
 {
 public:

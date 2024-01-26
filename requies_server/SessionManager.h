@@ -5,18 +5,18 @@ class SessionManager
 private:
 	static SessionManager* _instance;
 	std::map<int32, GameSession*> _sessions;
-	CRITICAL_SECTION	   _cs;
+	CriticalSectionObject	   _cs;
 	uint32				   _sessionId = 0;
 
 public:
 	SessionManager()
 	{
-		InitializeCriticalSection(&_cs);
+
 	}
 
 	~SessionManager()
 	{
-		DeleteCriticalSection(&_cs);
+
 	}
 
 public:

@@ -7,45 +7,45 @@
 #include "MapManager.h"
 Sector::Sector()
 {
-	InitializeCriticalSection(&_cs);
+
 }
 
 Sector::~Sector()
 {
-	DeleteCriticalSection(&_cs);
+
 }
 
 void Sector::Set(Monster* monster)
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 
 	_monsters.insert(monster);
 }
 
 void Sector::Set(GameSession* session)
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 
 	_sessions.insert(session);
 }
 
 void Sector::Reset(GameSession* session)
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 
 	_sessions.erase(session);
 }
 
 void Sector::Reset(Monster* monster)
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 
 	_monsters.erase(monster);
 }
 
 void Sector::BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize)
 {
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 
 	for (auto s : _sessions)
 		s->Send(sendBuffer, sendSize);
@@ -54,7 +54,6 @@ void Sector::BroadCast(GameSession* session, BYTE* sendBuffer, int32 sendSize)
 void Sector::SendPlayerList(GameSession* session)
 {
 	Player* player = session->GetPlayer();
-
 	BYTE sendBuffer[255];
 	BufferWriter bw(sendBuffer);
 	PacketHeader* pktHeader = bw.WriteReserve<PacketHeader>();
@@ -73,32 +72,27 @@ void Sector::SendPlayerList(GameSession* session)
 	WCHAR* userName = player->GetPlayerName();
 	int8 userNameSize = wcslen(userName) * sizeof(WCHAR);
 	int8 playerType = player->GetPlayerType();
-
-	bw.Write(sessionId);
-	bw.Write(playerState);
-	bw.Write(playerDir);
-	bw.Write(playerMouseDir);
-	bw.Write(playerPos);
-	bw.Write(playerQuaternion);
-	bw.Write(playerTarget);
-	bw.Write(playerMoveType);
-	bw.Write(playerHp);
-	bw.Write(playerMp);
-	bw.Write(level);
-	bw.Write((int8)userNameSize);
-	bw.WriteWString(userName, userNameSize);
-	bw.Write(playerType);
-
-	pktHeader->_type = PacketProtocol::S2C_PLAYERNEW;
-	pktHeader->_pktSize = bw.GetWriterSize();
-
-	Lock lock(&_cs);
+	PLAYERNEW_PACKET playerNewPacket;
+	playerNewPacket.sessionId = sessionId;
+	playerNewPacket.playerState = playerState;
+	playerNewPacket.playerDir = playerDir;
+	playerNewPacket.playerMouseDir = playerMouseDir;
+	playerNewPacket.playerPos = playerPos;
+	playerNewPacket.playerQuaternion = playerQuaternion;
+	playerNewPacket.playerTarget = playerTarget;
+	playerNewPacket.playerMoveType = playerMoveType;
+	playerNewPacket.playerHp = playerHp;
+	playerNewPacket.playerMp = playerMp;
+	playerNewPacket.level = level;
+	wcscpy_s(playerNewPacket.playerName, userName);
+	playerNewPacket.playerType = playerType;
+	LockGuard lock(&_cs);
 
 	for (auto s : _sessions)
 	{
 		if (s->GetSessionID() == session->GetSessionID())
 			continue;
-		s->Send(sendBuffer, pktHeader->_pktSize);
+		s->Send(reinterpret_cast<BYTE*>(&playerNewPacket), playerNewPacket._size);
 	}
 
 	int32 playerCount = _sessions.size();
@@ -128,21 +122,21 @@ void Sector::SendPlayerList(GameSession* session)
 		for (auto s : _sessions)
 		{
 			Player* p = s->GetPlayer();
-			bw.Write(s->GetSessionID());		//4
-			bw.Write((int8)p->GetState());    // 1
-			bw.Write((int8)p->GetDir());       // 1
-			bw.Write((int8)p->GetMouseDir());   // 1
-			bw.Write(p->GetPos()); // 19
-			bw.Write(p->GetCameraLocalRotation()); //35
-			bw.Write(p->GetTarget()); //47
-			bw.Write((int8)p->GetMoveType()); // 48
-			bw.Write(p->GetHp()); // 
-			bw.Write(p->GetMp());// 72
-			bw.Write((int8)p->GetLevel()); // 73
+			bw.Write(s->GetSessionID());				//4
+			bw.Write((int8)p->GetState());				// 1
+			bw.Write((int8)p->GetDir());				// 1
+			bw.Write((int8)p->GetMouseDir());			// 1
+			bw.Write(p->GetPos());						// 19
+			bw.Write(p->GetCameraLocalRotation());		// 35
+			bw.Write(p->GetTarget());					// 47
+			bw.Write((int8)p->GetMoveType());			// 48
+			bw.Write(p->GetHp());  
+			bw.Write(p->GetMp());						// 72
+			bw.Write((int8)p->GetLevel());				// 73
 			int32 puserNameSize = wcslen(p->GetPlayerName()) * sizeof(WCHAR);
-			bw.Write((int8)puserNameSize); // 74
+			bw.Write((int8)puserNameSize);				// 74
 			bw.WriteWString(p->GetPlayerName(), puserNameSize);
-			bw.Write((int8)p->GetPlayerType()); // 75
+			bw.Write((int8)p->GetPlayerType());			// 75
 		}
 
 		session->Send(sendBuffer2, pktHeader->_pktSize);
@@ -161,7 +155,7 @@ void Sector::SendMonsterList(GameSession* session)
 	BufferWriter bw(sendBuffer);
 	PacketHeader* header = bw.WriteReserve<PacketHeader>();
 	{
-		Lock lock(&_cs);
+		LockGuard lock(&_cs);
 
 		const int32 cnt = _monsters.size();
 
@@ -224,7 +218,7 @@ void Sector::SendPlayerRemoveList(GameSession* session)
 	pktHeader->_type = PacketProtocol::S2C_PLAYEROUT;
 	pktHeader->_pktSize = bw.GetWriterSize();
 
-	Lock lock(&_cs);
+	LockGuard lock(&_cs);
 	int32 playerCount = _sessions.size();
 
 	if (playerCount > 0)
@@ -275,7 +269,7 @@ void Sector::SendMonsterRemoveList(GameSession* session)
 	BufferWriter bw(sendBuffer);
 	PacketHeader* header = bw.WriteReserve<PacketHeader>();
 	{
-		Lock lock(&_cs);
+		LockGuard lock(&_cs);
 
 		const int32 cnt = _monsters.size();
 

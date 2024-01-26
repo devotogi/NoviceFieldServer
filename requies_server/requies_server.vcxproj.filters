@@ -36,6 +36,6 @@
     <ClInclude Include="MonsterTable.h" />
     <ClInclude Include="DBConnectionPool.h" />
     <ClInclude Include="MyDBConnection.h" />
-    <ClInclude Include="PacketHeader.h" />
+    <ClInclude Include="Packet.h" />
   </ItemGroup>
 </Project>

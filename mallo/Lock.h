@@ -1,39 +1,87 @@
 #pragma once
-class Lock
+class LockObject
 {
-	enum LockType
-	{
-		NONE,
-		MUTEX,
-		CS
-	};
+public:
+    LockObject() {};
+    ~LockObject() {};
 
+    virtual void Lock() abstract;
+    virtual void UnLock() abstract;
+};
+
+class CriticalSectionObject : public LockObject
+{
 private:
-	LPCRITICAL_SECTION _cs;
-	std::mutex* _mutex;
-	LockType _lockType = NONE;
+    CRITICAL_SECTION _cs;
 
 public:
-	Lock(LPCRITICAL_SECTION cs) : _cs(cs), _lockType(CS)
-	{
-		EnterCriticalSection(_cs);
-	}
+    CriticalSectionObject() : LockObject()
+    {
+        InitializeCriticalSection(&_cs);
+    }
 
-	Lock(std::mutex* m) : _mutex(m), _lockType(MUTEX)
-	{
-		_mutex->lock();
-	}
+    ~CriticalSectionObject()
+    {
+        DeleteCriticalSection(&_cs);
+    }
 
-	~Lock()
-	{
-		switch (_lockType)
-		{
-		case MUTEX:
-			_mutex->unlock();
-			break;
-		case CS:
-			LeaveCriticalSection(_cs);
-			break;
-		}
-	}
+public:
+    virtual void Lock() override
+    {
+        EnterCriticalSection(&_cs);
+    }
+
+    virtual void UnLock() override
+    {
+        LeaveCriticalSection(&_cs);
+    }
 };
+
+class MutexObject : public LockObject
+{
+private:
+    HANDLE _mutex;
+
+public:
+    MutexObject() : LockObject()
+    {
+        _mutex = CreateMutex(
+            NULL,
+            FALSE,
+            NULL);
+    }
+
+    ~MutexObject()
+    {
+        CloseHandle(_mutex);
+    }
+
+public:
+    virtual void Lock() override
+    {
+        WaitForSingleObject(_mutex, INFINITE);
+    }
+
+    virtual void UnLock() override
+    {
+        ReleaseMutex(_mutex);
+    }
+};
+
+class LockGuard
+{
+private:
+    LockObject* _obj;
+
+public:
+    LockGuard(LockObject* obj) : _obj(obj)
+    {
+        _obj->Lock();
+    }
+
+    ~LockGuard()
+    {
+        _obj->UnLock();
+    }
+};
+
