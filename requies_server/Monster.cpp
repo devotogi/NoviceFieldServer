@@ -12,20 +12,23 @@ Monster::Monster(int32 spawnZoneIndex, int32 monsterId, MonsterType type, const 
 	, Creature(CreatureType::MONSTER, pos, pos, State::IDLE, Dir::NONE, 1000, 1000, 100, 1.5f, false, 10, 0, 0)
 	, _monsterId(monsterId), _monsterType(type)
 {
+	InitializeCriticalSection(&_queueCs);
 }
 
 Monster::Monster(int32 monsterId, MonsterType type) 
 	: _monsterId(monsterId), _monsterType(type), Creature(CreatureType::MONSTER, {0,0,0}, { 0,0,0 }, State::RESPAWN, Dir::NONE, 1000, 1000, 100, 1.5f, false, 10, 0, 0)
 {
-
+	DeleteCriticalSection(&_queueCs);
 }
 
 Monster::Monster(int32 monsterId) : _monsterId(monsterId), _monsterType(MonsterType::MonstrerTypeMax), Creature(CreatureType::MONSTER, { 0,0,0 }, { 0,0,0 }, State::RESPAWN, Dir::NONE, 1000, 1000, 100, 1.5f, false, 10, 0,0)
 {
+	InitializeCriticalSection(&_queueCs);
 }
 
 Monster::Monster()
 {
+	InitializeCriticalSection(&_queueCs);
 }
 
 Monster::~Monster()
@@ -64,7 +67,10 @@ bool Monster::Attacked(Creature* Attacker, int32 damage)
 		realDamge = 0;
 
 	MonsterAttackedInfo info{ Attacker, realDamge };
-	_monsterAttackedEventQueue.Push(info);
+	_tsQueue.Push(info);
+	//EnterCriticalSection(&_queueCs);
+	//_pushQueue.push(info);
+	//LeaveCriticalSection(&_queueCs);
 	return false;
 }
 
@@ -377,11 +383,21 @@ void Monster::AttackedProc()
 {
 	if (_state == COOL_TIME) return;
 
-	// 3
-	while (_monsterAttackedEventQueue.Empty() == false)
+	//int pushQueueSize = _tsQueue.GetPushQueueSize();
+	//if (pushQueueSize > 0)
+	//{
+	//	EnterCriticalSection(&_queueCs);
+	//	std::swap(_pushQueue, _popQueue);
+	//	LeaveCriticalSection(&_queueCs);
+	//}
+	bool swapQueue = _tsQueue.SwapQueue();
+	if (swapQueue == false)
+		return;
+	
+	while (_tsQueue.PopQueueEmpty() == false)
 	{
-		MonsterAttackedInfo attackedEvent = _monsterAttackedEventQueue.Pop();
-		_damageQueue.push(attackedEvent.damage);
+		MonsterAttackedInfo attackedEvent = _tsQueue.Front();
+		_tsQueue.Pop();
 		_hp -= attackedEvent.damage;
 		_patrolLastTick = 0;
 		_patrolSumTick = 0;

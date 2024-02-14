@@ -7,7 +7,6 @@ class MonsterManager : public FPS
 {
 private:
 	int32						_monsterId = 0;
-	CRITICAL_SECTION			_cs;
 	std::queue<Monster*>		_waitSpawnQueue;
 	std::vector<Monster>		_monsterTable;
 	int32						_monsterTotalCnt = 0;

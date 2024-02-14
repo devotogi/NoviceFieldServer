@@ -19,15 +19,17 @@ public:
 		_queue.push(val);
 	}
 
+	bool Empty() 
+	{
+		LockGuard lock(&_cs);
+		return _queue.empty();
+	}
+
 	T Pop()
 	{
 		LockGuard lock(&_cs);
-		T ret = nullptr;
-		if (_queue.empty() == false)
-		{
-			ret = _queue.front();
-			_queue.pop();
-		}
+		T ret = _queue.front();
+		_queue.pop();
 		return ret;
 	}
 };

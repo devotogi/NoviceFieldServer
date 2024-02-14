@@ -68,6 +68,40 @@ public:
     }
 };
 
+class SpinLock : public LockObject
+{
+private:
+    volatile __int64 _lock;
+
+public:
+    SpinLock() : LockObject(), _lock(0) {};
+    ~SpinLock() {};
+
+    virtual void Lock() override;
+    virtual void UnLock() override;
+};
+
+inline void SpinLock::Lock()
+{
+    __int64 desired = true;
+    __int64 expected = false;
+    // T2 T3 T4
+    while (InterlockedCompareExchange64(&_lock, desired, expected))
+    {
+        Sleep(0);
+    }
+
+    // T1
+}
+
+inline void SpinLock::UnLock()
+{
+    __int64 desired = false;
+    __int64 expected = true;
+    InterlockedCompareExchange64(&_lock, desired, expected);
+}
+
+
 class LockGuard
 {
 private:

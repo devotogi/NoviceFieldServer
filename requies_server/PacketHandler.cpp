@@ -55,6 +55,10 @@ void PacketHandler::HandlePacket(GameSession* session, BYTE* packet, int32 packe
 	case PacketProtocol::C2S_PLAYERINIT:
 		HandlePacket_C2S_PLAYERINIT(session, packet, dataSize);
 		break;
+
+	case C2S_PLAYERSKILLSYNC:
+		HandlePacket_C2S_PLAYERSKILLSYNC(session, packet, packetSize);
+		break;
 	}
 }
 
@@ -202,4 +206,9 @@ void PacketHandler::HandlePacket_C2S_PLAYERINIT(GameSession* session, BYTE* pack
 {
 	C2S_PLAYERINIT_PACKET* p = reinterpret_cast<C2S_PLAYERINIT_PACKET*>(packet);
 	session->WelcomeInitPacket(p->userSQ, p->playerSQ);
+}
+
+void PacketHandler::HandlePacket_C2S_PLAYERSKILLSYNC(GameSession* session, BYTE* dataPtr, int32 dataSize)
+{
+	MapManager::GetInstance()->BroadCast(session->GetPlayer(), dataPtr,dataSize);
 }

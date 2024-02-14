@@ -1,6 +1,7 @@
 #pragma once
 #include "Creature.h"
 #include "LockBasedQueue.h"
+#include "TSQueue.h"
 class Monster : public Creature
 {
 	enum : int32
@@ -14,6 +15,7 @@ class Monster : public Creature
 	};
 
 private:
+	CRITICAL_SECTION					_queueCs;
 	int32								_spawnZoneIndex;
 	MonsterType							_monsterType;
 	Vector3								_vDir;
@@ -22,10 +24,10 @@ private:
 	Vector3								_dest = {0,0,0};
 	std::vector<Pos>					_path;
 	std::vector<Pos>					_conner;
-	std::queue<int32>					_damageQueue;
-	LockBasedQueue<MonsterAttackedInfo> _monsterAttackedEventQueue;
+	// LockBasedQueue<MonsterAttackedInfo> _monsterAttackedEventQueue;
 	float								_exp = 0;
 	bool								_firstAttack = false;
+	TSQueue<MonsterAttackedInfo>		_tsQueue;
 
 private:
 	Creature* _attacker = nullptr;

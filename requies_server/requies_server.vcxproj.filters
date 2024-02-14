@@ -18,6 +18,7 @@
     <ClCompile Include="MonsterTable.cpp" />
     <ClCompile Include="DBConnectionPool.cpp" />
     <ClCompile Include="MyDBConnection.cpp" />
+    <ClCompile Include="TSQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -37,5 +38,6 @@
     <ClInclude Include="DBConnectionPool.h" />
     <ClInclude Include="MyDBConnection.h" />
     <ClInclude Include="Packet.h" />
+    <ClInclude Include="TSQueue.h" />
   </ItemGroup>
 </Project>

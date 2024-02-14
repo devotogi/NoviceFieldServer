@@ -177,6 +177,7 @@
     <ClCompile Include="Sector.cpp" />
     <ClCompile Include="SessionManager.cpp" />
     <ClCompile Include="SpawnZone.cpp" />
+    <ClCompile Include="TSQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Creature.h" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Sector.h" />
     <ClInclude Include="SessionManager.h" />
     <ClInclude Include="SpawnZone.h" />
+    <ClInclude Include="TSQueue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

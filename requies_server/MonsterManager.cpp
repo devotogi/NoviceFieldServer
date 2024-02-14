@@ -8,12 +8,12 @@
 #include "GameSession.h"
 MonsterManager::MonsterManager()
 {
-	InitializeCriticalSection(&_cs);
+
 }
 
 MonsterManager::~MonsterManager()
 {
-	DeleteCriticalSection(&_cs);
+
 }
 
 void MonsterManager::Init(int32 totalCnt)

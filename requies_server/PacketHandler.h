@@ -17,5 +17,6 @@ private:
 	static void HandlePacket_C2S_PLAYERSTATINFO(GameSession* session, BYTE* packet, int32 packetSize);
 	static void HandlePacket_C2S_UPSTAT(GameSession* session, BYTE* packet, int32 packetSize);
 	static void HandlePacket_C2S_PLAYERINIT(GameSession* session, BYTE* dataPtr, int32 dataSize);
+	static void HandlePacket_C2S_PLAYERSKILLSYNC(GameSession* session, BYTE* dataPtr, int32 dataSize);
 };
 
